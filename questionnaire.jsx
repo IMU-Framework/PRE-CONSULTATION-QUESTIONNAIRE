@@ -256,7 +256,7 @@ const Questionnaire = () => {
               <div className="num mono">C</div>
               <div className="label">圖說專案</div>
               <div className="ttl">By Project · 另案報價</div>
-              <div className="desc">若有專業文件（如細部大樣、BOM 表、放樣圖等）若於諮詢過程中評估需出圖，將不計入時數，另行報價。</div>
+              <div className="desc">若有專業文件（如細部大樣、BOM 表、放樣圖等）於諮詢過程中評估需產出，將不計入時數，另行報價。</div>
             </div>
           </div>
           <div className="callout" style={{ marginTop: 22 }}>
