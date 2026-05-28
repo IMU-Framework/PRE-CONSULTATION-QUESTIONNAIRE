@@ -276,7 +276,7 @@ const ClientQuote = ({ f, m }) =>
             </tr>
             <tr>
               <th>辦公室規模</th><td>約 {f.scale || '—'} 坪 ／ 約 {f.head || '—'} 人</td>
-              <th>諮詢時段</th><td>週一至週四 14:00–18:00</td>
+              <th>可預約諮詢時段</th><td>週一至週四 14:00–18:00 單次最低1小時</td>
             </tr>
           </tbody>
         </table>
