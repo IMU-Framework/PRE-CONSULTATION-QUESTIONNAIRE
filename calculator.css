@@ -1,0 +1,232 @@
+/* Calculator-specific UI shell */
+
+body {
+  background: #eaeaea;
+  margin: 0;
+  font-family: "Noto Sans TC", system-ui, sans-serif;
+  color: #111;
+}
+
+.calc-root { min-height: 100vh; display: flex; flex-direction: column; }
+
+.calc-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 24px;
+  background: #fff;
+  border-bottom: 1px solid #d4d4d4;
+  position: sticky; top: 0; z-index: 10;
+}
+.calc-toolbar .brand .eb {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10px; letter-spacing: 0.22em; color: #888; text-transform: uppercase;
+}
+.calc-toolbar .brand .ttl { font-size: 18px; font-weight: 700; margin-top: 2px; }
+.calc-toolbar .actions { display: flex; gap: 10px; align-items: center; }
+.calc-toolbar .seg { display: flex; gap: 4px; }
+
+.calc-body {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 0;
+  flex: 1;
+}
+
+.calc-form {
+  background: #fafafa;
+  border-right: 1px solid #d4d4d4;
+  padding: 20px;
+  height: calc(100vh - 65px);
+  overflow-y: auto;
+  position: sticky;
+  top: 65px;
+}
+.calc-form details > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 0;
+  border-bottom: 1px solid #ddd;
+  user-select: none;
+  list-style: none;
+}
+.calc-form details > summary::-webkit-details-marker { display: none; }
+.calc-form details > summary::before {
+  content: "▸";
+  display: inline-block; margin-right: 8px;
+  transition: transform .15s ease;
+  color: #888;
+}
+.calc-form details[open] > summary::before { transform: rotate(90deg); }
+
+.calc-form .grid2 {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px;
+  margin-top: 8px;
+}
+
+.calc-summary {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: #2F4A9C; color: #fff;
+  border-radius: 2px;
+}
+.calc-summary .row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: 4px 0; font-size: 13px;
+}
+.calc-summary .row.total {
+  border-top: 1px solid rgba(255,255,255,0.3);
+  margin-top: 6px; padding-top: 10px;
+  font-size: 15px;
+}
+.calc-summary b { font-weight: 700; }
+
+.calc-preview {
+  padding: 24px;
+  overflow-y: auto;
+  height: calc(100vh - 65px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  background: #eaeaea;
+}
+.calc-preview.view-both {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+}
+.calc-preview.view-both .quote-wrap { flex: 1; min-width: 0; }
+.calc-preview.view-both .hf .sheet { padding: 36px 36px; }
+.calc-preview.view-both .hf h1 { font-size: 28px; }
+.calc-preview.view-both .hf .section-head .ttl { font-size: 17px; }
+
+.quote-wrap { width: 100%; max-width: 900px; }
+
+/* =============================================================
+   COMPACT MODE — target: each sheet fits one A4 page (~703×1017px
+   at 96dpi with 14/12mm margins). Tweak any block below to dial
+   in spacing/size individually.
+   ============================================================= */
+
+/* —— 整張紙的內距 —— */
+.hf.compact .sheet { padding: 22mm 18mm 18mm; }
+
+/* —— 標題層級 —— */
+.hf.compact h1 { font-size: 22px; line-height: 1.15; }
+.hf.compact h2 { font-size: 15px; }
+.hf.compact h3 { font-size: 12.5px; }
+.hf.compact .lead { font-size: 10.5px; line-height: 1.5; margin-top: 8px !important; max-width: 460px !important; }
+.hf.compact .eyebrow { font-size: 9px; letter-spacing: 0.18em; }
+
+/* —— Header —— */
+.hf.compact .header { padding-bottom: 10px; }
+.hf.compact .header > div:first-child { gap: 16px !important; }
+.hf.compact .header > div:nth-child(2) { margin-top: 8px !important; gap: 18px !important; }
+.hf.compact .header img { height: 34px !important; width: 34px !important; }
+.hf.compact .header-meta { font-size: 9px; line-height: 1.55; }
+
+/* —— Section 間距 —— */
+.hf.compact .section { margin-top: 10px; }
+.hf.compact .section-head { margin-bottom: 6px; gap: 10px; }
+.hf.compact .section-head .idx { font-size: 9px; padding: 1px 6px; }
+.hf.compact .section-head .ttl { font-size: 13px; }
+.hf.compact .section-head .hint { font-size: 9px; }
+
+/* —— 表格列高 / 字級 —— */
+.hf.compact .tbl th,
+.hf.compact .tbl td { padding: 4px 8px; font-size: 10.5px; line-height: 1.45; }
+.hf.compact .tbl th { font-size: 9px; letter-spacing: 0.08em; }
+.hf.compact .small { font-size: 9.5px; line-height: 1.4; }
+
+/* —— Card —— */
+.hf.compact .card { padding: 10px 12px !important; }
+.hf.compact .card .label { font-size: 9px; margin-bottom: 4px; letter-spacing: 0.14em; }
+.hf.compact .card .ttl { font-size: 13px !important; margin-bottom: 3px; }
+.hf.compact .card .desc { font-size: 10px; line-height: 1.5; }
+.hf.compact .grid-2 { gap: 10px 14px; }
+
+/* —— 客戶版費率大字 —— */
+.hf.compact .section .card span[style*="42"] { font-size: 28px !important; }
+
+/* —— Price summary —— */
+.hf.compact .price-row { padding: 4px 0; font-size: 11px; }
+.hf.compact .price-row.total { padding: 6px 0; }
+.hf.compact .price-row.total .v { font-size: 15px; }
+
+/* —— Stack / 條款卡 —— */
+.hf.compact .stack { gap: 6px; }
+.hf.compact .ack { padding: 7px 10px; }
+.hf.compact .ack .body { font-size: 10px; line-height: 1.5; }
+
+/* —— 條款 + 簽認整合區 —— */
+.hf.compact .terms-grid {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 14px;
+  align-items: stretch;
+}
+.hf.compact .terms-list {
+  display: grid;
+  gap: 5px;
+}
+.hf.compact .trm {
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 6px 9px;
+  border: 1px solid var(--ink);
+}
+.hf.compact .trm b { font-weight: 700; }
+.hf.compact .sign-inline {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  border: 1px solid var(--ink);
+  padding: 8px 12px;
+}
+.hf.compact .sign-inline .sign-cell {
+  display: flex;
+  flex-direction: column;
+}
+.hf.compact .sign-inline .sign-cell .field-lbl { font-size: 9.5px; }
+.hf.compact .sign-inline .sign-cell .field {
+  flex: 1;
+  margin-top: 4px;
+  min-height: 28px;
+  border: 0;
+  border-bottom: 1px solid var(--ink);
+}
+.hf.compact .sign-inline .sign-cell .small {
+  margin-top: 2px;
+  font-size: 9px;
+}
+
+/* —— 舊版 sign-row (內部單若仍使用) —— */
+.hf.compact .sign-row { gap: 24px; }
+.hf.compact .sign-row .col { padding-top: 4px; }
+.hf.compact .sign-row .field { margin-top: 22px !important; height: 22px; }
+.hf.compact .sign-row .field-lbl { font-size: 10px; }
+
+/* —— Footer —— */
+.hf.compact .foot { margin-top: 14px; padding-top: 8px; }
+.hf.compact .foot .lt { font-size: 9.5px; }
+.hf.compact .stamp { padding: 4px 9px; font-size: 9px; letter-spacing: 0.14em; }
+.hf.compact .pill { font-size: 9px; padding: 1px 7px; }
+
+/* 並排預覽時，再進一步縮小一點（已是 compact，這裡只微調 h1） */
+.calc-preview.view-both .hf.compact h1 { font-size: 20px; }
+.calc-preview.view-both .hf.compact .sheet { padding: 18mm 14mm 14mm; }
+
+/* PRINT */
+@page { size: A4; margin: 14mm 12mm; }
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  .calc-body { display: block; }
+  .calc-preview { padding: 0; height: auto; overflow: visible; display: block; }
+  .calc-preview .quote-wrap { max-width: none; width: 100%; }
+  .calc-preview .quote-wrap + .quote-wrap { page-break-before: always; }
+  .hf .sheet { box-shadow: none !important; padding: 0 !important; max-width: none !important; }
+  .hf.compact .sheet { padding: 4mm 2mm !important; }
+  .hf .section { break-inside: avoid; page-break-inside: avoid; }
+  .hf.compact { page-break-inside: avoid; }
+}
