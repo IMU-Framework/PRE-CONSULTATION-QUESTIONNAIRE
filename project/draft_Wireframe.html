@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<title>辦公室諮詢顧問 — Wireframes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; font-family: "Noto Sans TC", system-ui, sans-serif; background: #efece6; color: #1a1a1a; }
+  /* Wireframe primitives */
+  .wf { --ink:#1a1a1a; --mute:#7a766d; --line:#1a1a1a; --soft:#c9c4b8; --paper:#f7f5ef; --hl:#fff7c2; }
+  .wf * { box-sizing: border-box; }
+  .wf .sheet { background: var(--paper); color: var(--ink); padding: 56px 64px 72px; font-size: 13px; line-height: 1.55; }
+  .wf h1, .wf h2, .wf h3, .wf h4 { margin: 0; font-weight: 500; }
+  .wf .eyebrow { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--mute); }
+  .wf .anno { font-family: "JetBrains Mono", monospace; font-size: 10px; color: #b03a2e; letter-spacing: 0.03em; }
+  .wf .anno::before { content: "// "; }
+  .wf .ph { background: repeating-linear-gradient(135deg, transparent 0 8px, rgba(0,0,0,0.05) 8px 9px); border: 1px dashed var(--soft); color: var(--mute); display: flex; align-items: center; justify-content: center; font-family: "JetBrains Mono", monospace; font-size: 10px; text-align: center; padding: 8px; }
+  .wf .box { border: 1px solid var(--line); }
+  .wf .box-dash { border: 1px dashed var(--line); }
+  .wf .rule { border: 0; border-top: 1px solid var(--ink); margin: 0; }
+  .wf .rule-dash { border: 0; border-top: 1px dashed var(--soft); margin: 0; }
+  .wf .check { display: inline-block; width: 14px; height: 14px; border: 1.5px solid var(--ink); margin-right: 10px; vertical-align: -2px; }
+  .wf .check.r { border-radius: 50%; }
+  .wf .input { border: 0; border-bottom: 1px solid var(--ink); height: 22px; display: inline-block; min-width: 80px; }
+  .wf .field { border: 0; border-bottom: 1px solid var(--ink); display: block; height: 24px; margin-top: 6px; }
+  .wf .row { display: flex; gap: 24px; }
+  .wf .col { flex: 1; }
+  .wf .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 32px; }
+  .wf .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .wf .sect { margin-top: 32px; }
+  .wf .sect-title { display: flex; align-items: baseline; gap: 12px; border-bottom: 1.5px solid var(--ink); padding-bottom: 6px; margin-bottom: 14px; }
+  .wf .sect-num { font-family: "JetBrains Mono", monospace; font-size: 11px; }
+  .wf .sect-title h3 { font-size: 15px; font-weight: 700; }
+  .wf .sect-title .tag { margin-left: auto; font-family: "JetBrains Mono", monospace; font-size: 10px; padding: 2px 8px; border: 1px solid var(--ink); }
+  .wf .q { margin: 14px 0 18px; }
+  .wf .q-label { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+  .wf .q-label .n { font-family: "JetBrains Mono", monospace; margin-right: 8px; }
+  .wf .option { display: flex; align-items: center; padding: 4px 0; }
+  .wf .option .lbl { flex: 1; }
+  .wf .stamp { display: inline-block; border: 1.5px solid var(--ink); padding: 6px 14px; font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; transform: rotate(-2deg); }
+  .wf .callout { background: var(--hl); padding: 10px 14px; font-size: 11px; border-left: 3px solid var(--ink); }
+  .wf .meta-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .wf .meta-table th, .wf .meta-table td { border: 1px solid var(--ink); padding: 8px 10px; text-align: left; vertical-align: top; }
+  .wf .meta-table th { background: #ebe7dc; font-weight: 500; font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; }
+  .wf .price-line { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--soft); font-family: "JetBrains Mono", monospace; font-size: 12px; }
+  .wf .price-line.total { border-bottom: 2px solid var(--ink); border-top: 2px solid var(--ink); font-weight: 700; font-size: 14px; padding: 10px 0; margin-top: 8px; }
+  .wf .pill { display: inline-block; padding: 3px 10px; border: 1px solid var(--ink); border-radius: 100px; font-family: "JetBrains Mono", monospace; font-size: 10px; }
+  .wf .pill.k { background: var(--ink); color: var(--paper); }
+  .wf .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; align-items: stretch; margin: 8px 0 4px; }
+  .wf .flow .step { border: 1px solid var(--ink); padding: 10px; position: relative; background: var(--paper); }
+  .wf .flow .step + .step { border-left: 0; }
+  .wf .flow .step .n { font-family: "JetBrains Mono", monospace; font-size: 9px; color: var(--mute); }
+  .wf .flow .step .t { font-size: 12px; font-weight: 500; margin-top: 2px; }
+  .wf .flow .step .d { font-size: 10px; color: var(--mute); margin-top: 4px; line-height: 1.4; }
+  .wf .stack { display: grid; gap: 10px; }
+  .wf .small { font-size: 11px; color: var(--mute); }
+  .wf .mono { font-family: "JetBrains Mono", monospace; }
+  .wf .pad-tag { font-family: "JetBrains Mono", monospace; font-size: 9px; padding: 1px 5px; background: var(--ink); color: var(--paper); margin-left: 6px; vertical-align: 2px; }
+  .wf .note-card { border: 1px dashed var(--ink); padding: 10px 14px; font-size: 11px; line-height: 1.55; background: #fbfaf6; }
+  .wf .corner { position: absolute; top: 16px; right: 24px; font-family: "JetBrains Mono", monospace; font-size: 10px; color: var(--mute); }
+  .wf .header { position: relative; padding-bottom: 18px; border-bottom: 2px solid var(--ink); }
+  .wf .header h1 { font-size: 24px; letter-spacing: -0.01em; }
+  .wf .header .sub { color: var(--mute); margin-top: 6px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="draft_design-canvas.jsx"></script>
+<script type="text/babel" src="draft_onepager.jsx"></script>
+<script type="text/babel" src="draft_quote.jsx"></script>
+
+<div id="root"></div>
+<script type="text/babel">
+  const { DesignCanvas, DCSection, DCArtboard } = window;
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(
+    <DesignCanvas title="辦公室諮詢顧問 — 計費模型 Wireframes" subtitle="低保真：架構與流程優先；視覺後續再上">
+      <DCSection id="client-facing" title="A · 客戶端文件">
+        <DCArtboard id="onepager" label="1-pager：服務說明 + 前置問卷" width={820} height={2760}>
+          <OnePager />
+        </DCArtboard>
+        <DCArtboard id="quote" label="報價單（內部產出後寄給客戶）" width={820} height={2100}>
+          <QuoteSheet />
+        </DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+</script>
+
+</body>
+</html>
