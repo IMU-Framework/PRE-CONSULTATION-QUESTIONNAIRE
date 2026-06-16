@@ -6,6 +6,13 @@ const fmtNum = (n) => {
 };
 const ntd = (n) => `NT$ ${fmtNum(n)}`;
 
+// Quote number gains a 2-letter suffix when a project discount applies.
+const DISCOUNT_SUFFIX = 'DC';
+const qidShow = (f, m) => {
+  if (!f.qid) return '';
+  return m.hasDiscount ? `${f.qid}-${DISCOUNT_SUFFIX}` : f.qid;
+};
+
 // Parse questionnaire summary text into structured data.
 // Tolerant: missing lines just leave fields blank.
 function parseSummary(text) {
@@ -73,28 +80,45 @@ function buildQuoteModel(f) {
   const readyMult = READY_OPTS[f.readiness]?.mult ?? 1.0;
   const specMult = SPEC_OPTS[f.specTier]?.mult ?? 1.0;
   const hourly = Math.round(baseRate * scaleMult * readyMult * specMult);
+
+  // Project discount (offered after the quote): an explicit promo unit price.
+  const dRate = Number(f.discountRate);
+  const hasDiscount = f.discountRate !== '' && f.discountRate != null && dRate > 0 && dRate < hourly;
+  const effHourly = hasDiscount ? dRate : hourly;
+  const discountPct = hasDiscount ? Math.round((1 - effHourly / hourly) * 100) : 0;
+
   const baseHours = Number(f.baseHours) || 5;
   const addHours = Number(f.addHours) || 0;
   const drawing = Number(f.drawingFee) || 0;
-  const baseSubtotal = hourly * baseHours;
-  const addSubtotal = hourly * addHours;
+  const baseSubtotal = effHourly * baseHours;
+  const addSubtotal = effHourly * addHours;
   const subtotal = baseSubtotal + addSubtotal + drawing;
   const taxRate = Number(f.taxRate) || 0;
   const tax = Math.round(subtotal * taxRate / 100);
   const total = subtotal + tax;
   return {
     baseRate, scaleMult, readyMult, specMult, hourly,
+    hasDiscount, effHourly, discountPct,
     baseHours, addHours, drawing,
     baseSubtotal, addSubtotal,
     subtotal, taxRate, tax, total
   };
 }
 
-const QHead = ({ idx, title, hint }) =>
+// Unit-price cell: plain rate, or struck original + IMU-blue promo rate.
+const UnitPrice = ({ m }) => m.hasDiscount ?
+<span>
+    <span className="mono" style={{ textDecoration: 'line-through', color: '#9a9a9a' }}>{ntd(m.hourly)}</span>
+    <span className="mono" style={{ color: 'var(--brand)', fontWeight: 600, display: 'block' }}>{ntd(m.effHourly)}</span>
+  </span> :
+<span className="mono">{ntd(m.hourly)}</span>;
+
+const QHead = ({ idx, title, hint, meta }) =>
 <div className="section-head">
     <span className="idx">{idx}</span>
     <span className="ttl">{title}</span>
     {hint && <span className="hint">{hint}</span>}
+    {meta && <span style={{ order: 1, marginLeft: 'auto', fontSize: 11, fontWeight: 400, color: '#9a9a9a', whiteSpace: 'nowrap' }}>{meta}</span>}
   </div>;
 
 
@@ -117,7 +141,7 @@ const InternalQuote = ({ f, m }) => {
               <p className="lead" style={{ marginTop: 14, maxWidth: 520 }}>含係數判定與費率推導，僅供內部留底。</p>
             </div>
             <div className="header-meta">
-              <div>QUOTE NO. <b className="mono" style={{ color: 'var(--brand)' }}>{f.qid || '—'}</b></div>
+              <div>QUOTE NO. <b className="mono" style={{ color: 'var(--brand)' }}>{qidShow(f, m) || '—'}</b></div>
               <div>ISSUE <b>{f.issueDate || '—'}</b></div>
               <div>VALID <b>+ 14 days</b></div>
             </div>
@@ -125,7 +149,7 @@ const InternalQuote = ({ f, m }) => {
         </header>
 
         <section className="section">
-          <QHead idx="I" title="客戶資訊" />
+          <QHead idx="I" title="客戶資訊" meta={f.fillDate ? `填表日期　${f.fillDate}` : null} />
           <table className="tbl">
             <tbody>
               <tr>
@@ -163,7 +187,7 @@ const InternalQuote = ({ f, m }) => {
         </section>
 
         <section className="section">
-          <QHead idx="II" title="係數判定" hint="scale · readiness · spec" />
+          <QHead idx="II" title="係數判定" />
           <div className="grid-3">
             <div className="card">
               <div className="label">A · 規模係數　Scale</div>
@@ -191,6 +215,12 @@ const InternalQuote = ({ f, m }) => {
               {ntd(m.baseRate)}　×　<b>{m.scaleMult.toFixed(1)}</b>　×　<b>{m.readyMult.toFixed(1)}</b>　×　<b>{m.specMult.toFixed(1)}</b>　＝&nbsp;
               <span style={{ fontSize: 22, fontWeight: 700 }}>{ntd(m.hourly)}</span><span className="mute"> / hr</span>
             </div>
+            {m.hasDiscount &&
+            <div className="mono" style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #d4d4d4', fontSize: 15 }}>
+                <span className="mute">專案優惠價　</span>
+                <span style={{ textDecoration: 'line-through', color: '#9a9a9a' }}>{ntd(m.hourly)}</span>　→　
+                <span style={{ fontSize: 22, fontWeight: 700, color: 'var(--brand)' }}>{ntd(m.effHourly)}</span><span className="mute"> / hr　（折讓 {m.discountPct}%）</span>
+              </div>}
           </div>
         </section>
 
@@ -203,13 +233,13 @@ const InternalQuote = ({ f, m }) => {
             <tbody>
               <tr>
                 <td><b>基礎諮詢時數</b><div className="small">最低購買 5 小時</div></td>
-                <td className="mono">{ntd(m.hourly)}</td>
+                <td><UnitPrice m={m} /></td>
                 <td className="mono">{m.baseHours} hr</td>
                 <td className="mono">{ntd(m.baseSubtotal)}</td>
               </tr>
               <tr>
                 <td><b>彈性加購時數</b><div className="small">以 1 小時為單位</div></td>
-                <td className="mono">{ntd(m.hourly)}</td>
+                <td><UnitPrice m={m} /></td>
                 <td className="mono">{m.addHours} hr</td>
                 <td className="mono">{ntd(m.addSubtotal)}</td>
               </tr>
@@ -243,7 +273,7 @@ const ClientQuote = ({ f, m }) =>
     <div className="sheet">
       <header className="header" style={{ display: 'block' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
-          <div className="eyebrow">QUOTATION · NO. <b className="mono" style={{ color: 'var(--brand)' }}>{f.qid || '—'}</b></div>
+          <div className="eyebrow">QUOTATION · NO. <b className="mono" style={{ color: 'var(--brand)' }}>{qidShow(f, m) || '—'}</b></div>
           <img src="assets/logo-circle.png" alt="IMU Framework" style={{ height: 48, width: 48, flexShrink: 0, display: 'block' }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: 32, marginTop: 14 }}>
@@ -261,7 +291,7 @@ const ClientQuote = ({ f, m }) =>
       </header>
 
       <section className="section">
-        <QHead idx="I" title="專案資訊" />
+        <QHead idx="I" title="專案資訊" meta={f.fillDate ? `填表日期　${f.fillDate}` : null} />
         <table className="tbl">
           <tbody>
             <tr>
@@ -276,7 +306,7 @@ const ClientQuote = ({ f, m }) =>
             </tr>
             <tr>
               <th>辦公室規模</th><td>約 {f.scale || '—'} 坪 ／ 約 {f.head || '—'} 人</td>
-              <th>可預約諮詢時段</th><td>週一至週四 14:00–18:00 單次最低1小時</td>
+              <th>諮詢時段</th><td>週一至週四 14:00–18:00</td>
             </tr>
           </tbody>
         </table>
@@ -286,9 +316,13 @@ const ClientQuote = ({ f, m }) =>
         <QHead idx="II" title="服務費率" />
         <div className="card" style={{ padding: '24px 28px' }}>
           <div className="label">適用費率　Hourly Rate</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginTop: 8 }}>
-            <span style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 42, letterSpacing: '-0.01em' }}>{ntd(m.hourly)}</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 16, marginTop: 8, flexWrap: 'wrap' }}>
+            {m.hasDiscount &&
+            <span style={{ fontFamily: 'var(--sans)', fontWeight: 400, fontSize: 26, color: '#9a9a9a', textDecoration: 'line-through' }}>{ntd(m.hourly)}</span>}
+            <span style={{ fontFamily: 'var(--sans)', fontWeight: 700, fontSize: 42, letterSpacing: '-0.01em', color: m.hasDiscount ? 'var(--brand)' : 'inherit' }}>{ntd(m.effHourly)}</span>
             <span className="mute" style={{ fontSize: 14 }}>／ 每小時</span>
+            {m.hasDiscount &&
+            <span className="pill" style={{ background: 'var(--brand)', color: '#fff', borderColor: 'var(--brand)' }}>專案優惠價　折讓 {m.discountPct}%</span>}
           </div>
           <div className="small" style={{ marginTop: 12, lineHeight: 1.7 }}>
             * 上述費率已涵蓋本案之服務評估，於本報價單有效期內適用。<br />
@@ -312,7 +346,7 @@ const ClientQuote = ({ f, m }) =>
                 <div style={{ fontWeight: 500 }}>基礎諮詢時數 <span className="pill a">必購</span></div>
                 <div className="small">最低購買 5 小時，於首次諮詢前完款。</div>
               </td>
-              <td className="mono">{ntd(m.hourly)}</td>
+              <td><UnitPrice m={m} /></td>
               <td className="mono">{m.baseHours} hr</td>
               <td className="mono">{ntd(m.baseSubtotal)}</td>
             </tr>
@@ -321,7 +355,7 @@ const ClientQuote = ({ f, m }) =>
                 <div style={{ fontWeight: 500 }}>彈性加購時數</div>
                 <div className="small">超過基礎時數後，以 1 小時為單位加購。</div>
               </td>
-              <td className="mono">{ntd(m.hourly)}</td>
+              <td><UnitPrice m={m} /></td>
               <td className="mono">{m.addHours} hr</td>
               <td className="mono">{ntd(m.addSubtotal)}</td>
             </tr>
@@ -370,7 +404,7 @@ const ClientQuote = ({ f, m }) =>
 
       <div className="foot">
         <div className="lt">本報價單僅供本案使用 · 報價有效期 14 天 · 首次諮詢前完款後生效</div>
-        <div className="stamp">QUOTE · {f.qid || '2026'}</div>
+        <div className="stamp">QUOTE · {qidShow(f, m) || '2026'}</div>
       </div>
     </div>
   </div>;

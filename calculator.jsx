@@ -14,6 +14,7 @@ const toDigit = (v) => String(v)
 const DEFAULTS = {
   qid: '',
   issueDate: todayISO(),
+  fillDate: '',
   company: '', contact: '', line: '', phone: '', address: '',
   scale: '', head: '', condition: '', topics: '',
   q4Docs: '', q6Spaces: '', q7Schedule: '',
@@ -24,6 +25,8 @@ const DEFAULTS = {
   baseHours: '5',
   addHours: '0',
   drawingFee: '0',
+  discountPct: '',
+  discountRate: '',
   taxRate: '5',
 };
 
@@ -108,12 +111,25 @@ const Calculator = () => {
 
   const m = useMemoC(() => buildQuoteModel(f), [f]);
 
+  // Promo price: % off and unit price stay in sync against the current rate.
+  const onDiscPct = (v) => {
+    if (v === '') { setF(p => ({ ...p, discountPct: '', discountRate: '' })); return; }
+    const rate = Math.round(m.hourly * (1 - Number(v) / 100));
+    setF(p => ({ ...p, discountPct: v, discountRate: rate > 0 ? String(rate) : '' }));
+  };
+  const onDiscRate = (v) => {
+    if (v === '') { setF(p => ({ ...p, discountPct: '', discountRate: '' })); return; }
+    const pct = m.hourly > 0 ? Math.round((1 - Number(v) / m.hourly) * 100) : 0;
+    setF(p => ({ ...p, discountRate: v, discountPct: pct > 0 ? String(pct) : '0' }));
+  };
+
   const doParse = () => {
     if (!paste.trim()) { setParseMsg('請先貼上摘要文字'); return; }
     const p = parseSummary(paste);
     setF(prev => ({
       ...prev,
       qid: p.qid || prev.qid,
+      fillDate: p.date || prev.fillDate,
       company: p.company || prev.company,
       contact: p.contact || prev.contact,
       line: p.line || prev.line,
@@ -190,6 +206,10 @@ const Calculator = () => {
               <div style={cstyles.block}>
                 <Lbl>問卷單號</Lbl>
                 <TextInput value={f.qid} onChange={v => set('qid', v)} placeholder="20260527-AB" mono />
+              </div>
+              <div style={cstyles.block}>
+                <Lbl hint="客戶填寫問卷的日期，隨摘要帶入">客戶填表日期</Lbl>
+                <TextInput value={f.fillDate} onChange={v => set('fillDate', v)} placeholder="2026 / 05 / 27" />
               </div>
               <div style={cstyles.block}>
                 <Lbl>報價日期</Lbl>
@@ -296,12 +316,34 @@ const Calculator = () => {
                 <Lbl hint="按需要填入；0 則顯示為「另案」">圖說專案費</Lbl>
                 <NumInput value={f.drawingFee} onChange={v => set('drawingFee', v)} suffix="NT$" />
               </div>
+              <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #e2e2e2' }}>
+                <Lbl hint="報價後再給的折讓；填折扣 % 或優惠單價，互相換算">專案優惠價（折讓）</Lbl>
+                <div className="grid2">
+                  <div>
+                    <Lbl>折扣</Lbl>
+                    <NumInput value={f.discountPct} onChange={onDiscPct} suffix="% off" />
+                  </div>
+                  <div>
+                    <Lbl>優惠後單價</Lbl>
+                    <NumInput value={f.discountRate} onChange={onDiscRate} suffix="NT$/hr" />
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: '#666', marginTop: 6, lineHeight: 1.6 }}>
+                  原適用費率 <b className="mono">{ntd(m.hourly)}</b> / hr
+                  {m.hasDiscount &&
+                  <span> 　→　優惠 <b className="mono" style={{ color: 'var(--brand)' }}>{ntd(m.effHourly)}</b> / hr（折讓 {m.discountPct}%）</span>}
+                </div>
+              </div>
             </div>
           </details>
 
           {/* Compact summary */}
           <div className="calc-summary">
-            <div className="row"><span>適用費率</span><b className="mono">{ntd(m.hourly)}</b></div>
+            <div className="row"><span>適用費率</span>
+              <b className="mono">{m.hasDiscount ?
+                <span><span style={{ textDecoration: 'line-through', color: '#9a9a9a', fontWeight: 400, marginRight: 6 }}>{ntd(m.hourly)}</span><span style={{ color: 'var(--brand)' }}>{ntd(m.effHourly)}</span></span> :
+                ntd(m.hourly)}</b>
+            </div>
             <div className="row"><span>小計</span><span className="mono">{ntd(m.subtotal)}</span></div>
             <div className="row"><span>稅 {m.taxRate}%</span><span className="mono">{ntd(m.tax)}</span></div>
             <div className="row total"><span>總額</span><b className="mono">{ntd(m.total)}</b></div>

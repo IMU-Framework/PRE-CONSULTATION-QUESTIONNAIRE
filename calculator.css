@@ -220,6 +220,7 @@ body {
 @page { size: A4; margin: 14mm 12mm; }
 @media print {
   body { background: #fff; }
+  .hf, .hf * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .no-print { display: none !important; }
   .calc-body { display: block; }
   .calc-preview { padding: 0; height: auto; overflow: visible; display: block; }
