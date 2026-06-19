@@ -55,7 +55,7 @@ const NumField = ({ value, onChange, suffix, width = 110 }) =>
       fontFamily: 'var(--mono)', fontSize: 16, fontWeight: 500,
       padding: '2px 0', outline: 'none'
     }} />
-  
+
     <span style={{ fontSize: 13 }}>{suffix}</span>
   </span>;
 
@@ -197,6 +197,13 @@ const Questionnaire = () => {
     }
   };
 
+  const doSend = () => {
+    if (!submitted) setSubmitted(true);
+    const subject = `辦公室裝修諸詢問卷｜${s.company || '客戶'}｜${qid}`;
+    const href = `mailto:imuchien@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(summary)}`;
+    window.location.href = href;
+  };
+
   return (
     <div className="hf">
       <div className="sheet" style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -260,8 +267,8 @@ const Questionnaire = () => {
             </div>
           </div>
           <div className="callout" style={{ marginTop: 22 }}>
-            <strong>計費邏輯</strong>　  費率將依「規模」、「準備度」與「需求明確度」微幅調整。 收到本問卷後，我方將於 1 個工作日內回覆專屬報價單。
-          
+            <strong>計費邏輯</strong>　  費率將依「規模」、「準備度」與「需求明確度」微幅調整。 收到本問卷後，我方將於 1 個工作日內回覆專屬報價單。
+
           </div>
         </section>
 
@@ -403,10 +410,21 @@ const Questionnaire = () => {
         <section className="section">
           <div className="card" style={{ background: 'var(--paper-2)', padding: '20px 24px' }}>
             <div className="label" style={{ marginBottom: 8 }}>送出方式</div>
-            <p style={{ fontSize: 13, lineHeight: 1.6 }}>填妥後請按下「產生摘要」按鈕，將結果複製貼到 LINE 回傳給我們。我方收件後將於 1 個工作日內回覆專屬報價單。
-
+            <p style={{ fontSize: 13, lineHeight: 1.6, marginBottom: 12 }}>填妥後請按下「產生摘要」按鈕，將結果複製貼到 LINE 或 Email 回傳給我們。我方收件後將於 1 個工作日內回覆專屬報價單。
             </p>
-            <div style={{ display: 'flex', gap: 12, marginTop: 16, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', fontSize: 13 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.05.7.2.8.45.08.23.05.58.03.82l-.13.8c-.04.24-.19.93.82.51 1-.42 5.43-3.2 7.4-5.48C20.5 14.4 22 12.8 22 11c0-4.4-4.5-8-10-8Z" fill="#06C755"/></svg>
+                <span className="mute" style={{ fontSize: 11, letterSpacing: '0.08em' }}>LINE ID</span>
+                <b className="mono">ivia.chien</b>
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" stroke="var(--brand)" strokeWidth="1.6"/><path d="M3.5 6.5 12 12.5l8.5-6" stroke="var(--brand)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                <span className="mute" style={{ fontSize: 11, letterSpacing: '0.08em' }}>EMAIL</span>
+                <b className="mono">imuchien@gmail.com</b>
+              </span>
+            </div>
+            <div style={{ display: 'flex', gap: 12, marginTop: 18, alignItems: 'center', flexWrap: 'wrap' }}>
               <button
                 onClick={() => setSubmitted(true)}
                 disabled={!required}
@@ -428,12 +446,17 @@ const Questionnaire = () => {
         {/* Result panel */}
         {submitted &&
         <section className="section">
-            <SectHead idx="06" title="問卷摘要" hint="Copy & send via LINE" />
+            <SectHead idx="06" title="問卷摘要" hint="Copy & send" />
             <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
               <button
               onClick={doCopy}
               style={{ padding: '10px 22px', border: '1.5px solid var(--brand)', background: 'var(--brand)', color: '#fff', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
                 {copied ? '✓ 已複製' : '複製到剪貼簿'}
+              </button>
+              <button
+              onClick={doSend}
+              style={{ padding: '10px 22px', border: '1.5px solid var(--brand)', background: '#fff', color: 'var(--brand)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
+                送出至 Email
               </button>
               <button
               onClick={() => setSubmitted(false)}
@@ -456,7 +479,7 @@ const Questionnaire = () => {
 
         <div className="foot" style={{ gap: "10px", flexDirection: 'column', alignItems: 'flex-start' }}>
           <div className="lt" style={{ width: "100%" }}>本問卷僅作評估用，不構成服務承諾。問卷未經授權不得重製、散布或作商業用途。
- © 2026 一畝框作有限公司 IMU Framework Ltd. All rights reserved.
+ © 2026 一畝框作有限公司 IMU Framework Ltd. All rights reserved.
           </div>
         </div>
 
