@@ -64,9 +64,10 @@ function suggestReadiness(f) {
 function suggestSpec(f) {
   const spaces = String(f.q6Spaces ?? '').trim();
   const schedule = String(f.q7Schedule ?? '').trim();
-  // Both space program and timeline are filled in concretely
-  if (spaces.length > 3 && schedule.length > 3) return 'A';
-  return 'B';
+  const spacesBlank = !spaces || spaces === '（未勾選）';
+  const scheduleBlank = !schedule || /＿＿/.test(schedule);
+  if (spacesBlank || scheduleBlank) return 'B';
+  return 'A';
 }
 
 // Suggest scale tier from Q1/Q2 numbers.
