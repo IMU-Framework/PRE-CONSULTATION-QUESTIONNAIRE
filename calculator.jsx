@@ -109,6 +109,24 @@ const Calculator = () => {
     // eslint-disable-next-line
   }, [f.scale, f.head]);
 
+  // Auto-classify 準備度 from Q3 現況 / Q4 可提供資料 / Q5 諮詢重點.
+  React.useEffect(() => {
+    const touched = [f.condition, f.q4Docs, f.topics].some(v => String(v ?? '').trim() !== '');
+    if (!touched) return;
+    const sugg = suggestReadiness(f);
+    setF(p => p.readiness === sugg ? p : { ...p, readiness: sugg });
+    // eslint-disable-next-line
+  }, [f.condition, f.q4Docs, f.topics]);
+
+  // Auto-classify 明確度 from Q6 空間機能 / Q7 時程.
+  React.useEffect(() => {
+    const touched = [f.q6Spaces, f.q7Schedule].some(v => String(v ?? '').trim() !== '');
+    if (!touched) return;
+    const sugg = suggestSpec(f);
+    setF(p => p.specTier === sugg ? p : { ...p, specTier: sugg });
+    // eslint-disable-next-line
+  }, [f.q6Spaces, f.q7Schedule]);
+
   const m = useMemoC(() => buildQuoteModel(f), [f]);
 
   // Promo price: % off and unit price stay in sync against the current rate.
@@ -267,7 +285,7 @@ const Calculator = () => {
               </div>
               <div style={{ fontSize: 11, color: '#666', marginTop: 6 }}>{SCALE_OPTS[f.scaleTier].desc}</div>
 
-              <Lbl hint="依 Q4 可提供資料 + Q6 需求明確度判斷" style={{ marginTop: 14 }}>準備度係數</Lbl>
+              <Lbl hint="依 Q3 現況 + Q4 可提供資料 + Q5 諮詢重點自動判定，可手動調整" style={{ marginTop: 14 }}>準備度係數</Lbl>
               <div style={{ display: 'flex', gap: 6 }}>
                 {Object.entries(READY_OPTS).map(([k, o]) => (
                   <button key={k} onClick={() => set('readiness', k)} style={cstyles.pill(f.readiness === k)}>
@@ -278,7 +296,7 @@ const Calculator = () => {
               </div>
               <div style={{ fontSize: 11, color: '#666', marginTop: 6 }}>{READY_OPTS[f.readiness].desc}</div>
 
-              <Lbl hint="依 Q6 空間機能 + Q7 時程具體程度判斷" style={{ marginTop: 14 }}>明確度係數</Lbl>
+              <Lbl hint="依 Q6 空間機能 + Q7 時程自動判定，可手動調整" style={{ marginTop: 14 }}>明確度係數</Lbl>
               <div style={{ display: 'flex', gap: 6 }}>
                 {Object.entries(SPEC_OPTS).map(([k, o]) => (
                   <button key={k} onClick={() => set('specTier', k)} style={cstyles.pill(f.specTier === k)}>
