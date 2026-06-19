@@ -50,6 +50,25 @@ function parseSummary(text) {
   return out;
 }
 
+// Suggest readiness tier from Q3 現況 / Q4 可提供資料 / Q5 諮詢重點.
+function suggestReadiness(f) {
+  const docs = String(f.q4Docs ?? '').trim();
+  // Has CAD / floor plan / dimension drawings → resource-ready
+  if (/cad|平面圖|尺寸圖|配置圖|帶尺寸/.test(docs.toLowerCase())) return 'A';
+  // Has any substantial docs description
+  if (docs.length > 5) return 'A';
+  return 'B';
+}
+
+// Suggest spec tier from Q6 空間機能 / Q7 時程.
+function suggestSpec(f) {
+  const spaces = String(f.q6Spaces ?? '').trim();
+  const schedule = String(f.q7Schedule ?? '').trim();
+  // Both space program and timeline are filled in concretely
+  if (spaces.length > 3 && schedule.length > 3) return 'A';
+  return 'B';
+}
+
 // Suggest scale tier from Q1/Q2 numbers.
 function suggestScaleTier(sqft, head) {
   const s = Number(sqft) || 0;
@@ -411,6 +430,8 @@ const ClientQuote = ({ f, m }) =>
 
 
 window.parseSummary = parseSummary;
+window.suggestReadiness = suggestReadiness;
+window.suggestSpec = suggestSpec;
 window.suggestScaleTier = suggestScaleTier;
 window.buildQuoteModel = buildQuoteModel;
 window.SCALE_OPTS = SCALE_OPTS;
